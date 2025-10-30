@@ -37,11 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Build participants list HTML: avatar + name, plus count in header
         const participantsHTML = details.participants.length
           ? details.participants
-              .map(
-                (p) =>
-                  `<li class="participant-item"><span class="participant-avatar">${getInitials(
-                    p
-                  )}</span><span class="participant-name">${p}</span></li>`
+              .map((p) =>
+                `<li class="participant-item"><span class="participant-avatar">${getInitials(
+                  p
+                )}</span><span class="participant-name">${p}</span><button class="participant-delete" data-activity="${encodeURIComponent(
+                  name
+                )}" data-email="${encodeURIComponent(p)}" title="Remove participant">🗑️</button></li>`
               )
               .join("")
           : `<li class="participant-empty">No participants yet</li>`;
@@ -62,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         activitiesList.appendChild(activityCard);
 
+          // Delegate delete clicks via event listener on the card
+          // (we use delegation outside after rendering all activities too)
+
         // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
@@ -73,6 +77,41 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error fetching activities:", error);
     }
   }
+
+  // Event delegation: handle delete button clicks inside activities list
+  activitiesList.addEventListener("click", async (e) => {
+    const btn = e.target.closest && e.target.closest(".participant-delete");
+    if (!btn) return;
+
+    const activityEncoded = btn.dataset.activity;
+    const emailEncoded = btn.dataset.email;
+
+    if (!activityEncoded || !emailEncoded) return;
+
+    const activityName = decodeURIComponent(activityEncoded);
+    const email = decodeURIComponent(emailEncoded);
+
+    if (!confirm(`Remove ${email} from ${activityName}?`)) return;
+
+    try {
+      const response = await fetch(
+        `/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(email)}`,
+        { method: "DELETE" }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Refresh the activities list to reflect the change
+        fetchActivities();
+      } else {
+        alert(result.detail || "Failed to remove participant");
+      }
+    } catch (err) {
+      console.error("Error removing participant:", err);
+      alert("Failed to remove participant. Please try again.");
+    }
+  });
 
   // Handle form submission
   signupForm.addEventListener("submit", async (event) => {

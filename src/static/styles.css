@@ -150,8 +150,8 @@ footer {
 
 /* Miglioramento lista partecipanti: avatar + nome, aspetto pulito e scroll */
 .participants-list {
-  list-style: disc;
-  margin: 8px 0 0 20px;
+  list-style: none; /* hide bullet points */
+  margin: 8px 0 0 0;
   padding: 0;
   max-height: 140px;
   overflow-y: auto;
@@ -189,6 +189,22 @@ footer {
 .participant-name {
   color: #1a237e;
   font-weight: 600;
+}
+
+/* delete icon/button for participants */
+.participant-delete {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.participant-delete:hover {
+  background: rgba(198, 40, 40, 0.08);
 }
 
 /* fallback quando non ci sono partecipanti */
